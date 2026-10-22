@@ -1,6 +1,6 @@
 #ifndef __GPIO_CONFIG_H__
 #define __GPIO_CONFIG_H__
-#define STM32F401xE
+#define STM32F46xx
 #include "stm32f4xx.h"
 #include "stdint.h"
 #include "system_config.h"
