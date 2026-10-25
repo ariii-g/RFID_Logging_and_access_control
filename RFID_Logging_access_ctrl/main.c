@@ -7,9 +7,9 @@
 #include "inc/gpio_config.h"
 #include "inc/spi.h"
 #include "inc/system_config.h"
-#include "inc/gpio_config.h"
 #include "inc/usart.h"
 #include "max7219.h"
+#include "inc/st7789.h"
 
 #define LED_PIN 5 // Pin 5 corresponds to the on-board LED on the NUCLEO-64 board
 #define BUTTON_PIN 13 // Pin 13 corresponds to the on-board button on the NUCLEO-64 board
@@ -103,52 +103,26 @@ int main()
   UART_RX_IRQ_EN(USART2,1);
   NVIC_EnableIRQ(USART2_IRQn);
   
-  max7219_config();
+  ST7789_Port_Init();   // relojes, pines del puerto B y SPI2 
+  ST7789_Init();        // reset por RST, configuracion y pantalla negra
+  ST7789_DrawFilledRectangle(0,   0,   160, 20, RED);     // superior izquierda
+  ST7789_DrawFilledRectangle(161, 0,   159, 20, GREEN);   // superior derecha
+  ST7789_DrawFilledRectangle(0,   220, 160, 20, BLUE);    // inferior izquierda
+  ST7789_DrawFilledRectangle(161, 220, 159, 20, YELLOW);  // inferior derecha
+  ST7789_WriteString(24, 60,  "CONTROL DE ACCESO", Font_16x26, WHITE, BLACK);
+  ST7789_WriteString(61, 110, "Acerque su tarjeta", Font_11x18, CYAN, BLACK);
+  uart_puts(USART2, "Pantalla inicializada\n\r");
 
-  max7219_print(data);
-
-  uint8_t idx=0;
-  uint8_t p_message[20];
-  point.x = 3,
-  point.y = 3;
-
-  draw_point(data,point);
- uint8_t direction = 'w';
   while(1)
   {
-    if(timers.sw_tmr1_flag){
+    if(timers.sw_tmr1_flag){      
       timers.sw_tmr1_flag = 0;
-      toggle_pin_state(GPIOA,LED_PIN);
-      if(direction=='w'){
-        if(point.y<7){
-          point.y++;
-        }
-      } else if (direction=='s') {
-        if(point.y>0){
-          point.y--;
-        }
-      } else if (direction=='a') {
-        if(point.x>0){
-          point.x--;
-        }
-      }else if (direction=='d') {
-        if(point.x<7){
-          point.x++;
-        }
-      }
-      sprintf(p_message,"x=%d,y=%d\n\r\0",point.x,point.y);
-      uart_puts(USART2,p_message);
-      draw_point(data,point);
+      toggle_pin_state(GPIOA, LED_PIN);
     }
-    
-    if(uart_rx_flag){
+
+    if(uart_rx_flag){              
       uart_rx_flag = 0;
-      direction = uart_rx_data;
-      sprintf(p_message,"x=%d,y=%d\n\r\0",point.x,point.y);
-      uart_puts(USART2,p_message);
-      draw_point(data,point);
+      uart_putc(USART2, uart_rx_data);
     }
   }
-
-
 }

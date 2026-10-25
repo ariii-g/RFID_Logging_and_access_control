@@ -1,6 +1,6 @@
 #ifndef __SYSTEM_CONFIG_H__
 #define __SYSTEM_CONFIG_H__
-#define STM32F46xx
+#define STM32F446xx
 #include "stm32f4xx.h"
 #include "stdint.h"
 

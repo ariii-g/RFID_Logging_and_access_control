@@ -63,7 +63,22 @@ char SPI_Master_Tranfer(SPI_TypeDef *SPI, uint8_t  *data, uint32_t size){
     return(0);
 
 }
+ // Transmision de datos en modo maestro, sin recibir datos de vuelta.
+char SPI_Master_Transmit(SPI_TypeDef *SPI, const uint8_t *data, uint32_t size){
+    uint32_t i=0;
+    while(i<size){
+        while (!(SPI->SR&SPI_SR_TXE));
+        SPI->DR = data[i];
+        i++;
+    }
+    while (!READ_REG_FIELD(SPI->SR,SPI_SR_TXE));
+    while (READ_REG_FIELD(SPI->SR,SPI_SR_BSY));
 
+    (void)SPI->DR;   // leer DR y luego SR limpia RXNE y OVR
+    (void)SPI->SR;
+
+    return(0);
+}
 void SPI_Slave_Transmit(SPI_TypeDef* SPI,uint8_t txdata){
     SPI->DR = txdata;
 }
