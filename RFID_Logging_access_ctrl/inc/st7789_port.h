@@ -1,7 +1,6 @@
 #ifndef ST7789_PORT_H
 #define ST7789_PORT_H
 #include "spi.h"
-#define ST7789_SPI   SPI2
 #define ST7789_CS_PIN   9    // CS activo en bajo bit 9
 #define ST7789_DC_PIN   1    // DC cambio entre comando y dato, alto bit 1
 #define ST7789_RST_PIN  0    // PB0 - reset, activo en bajo  
