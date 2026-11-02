@@ -8,11 +8,6 @@
 #include "inc/spi.h"
 #include "inc/system_config.h"
 #include "inc/usart.h"
-#include "inc/gpio_config.h"
-#include "inc/spi.h"
-#include "inc/system_config.h"
-#include "inc/usart.h"
-#include "max7219.h"
 #include "inc/st7789.h"
 #include "inc/tm_stm32f4_mfrc522.h"
 
@@ -26,9 +21,13 @@ volatile SW_Timers timers;
 volatile uint8_t uart_rx_flag=0;
 volatile uint8_t spi_rx_flag=0;
 volatile uint8_t uart_rx_data=0;
+uint8_t id[5];  
+uint8_t last_id[4];
+uint8_t has_last = 0;
+uint8_t no_card_count = 0;
 
-char msg[40];
-uint8_t id[5];
+
+
 /*The SysTick_Handler, was already defined as weak during the crt0.s init file, so when we define it here, 
 the Vector table is updated whit the new address where the function is allocated, so that when and interrupt happen
 the vector table knows where to find the SysTick_Handler*/
@@ -78,7 +77,7 @@ typedef struct
 pointd point;
 
 
-void draw_point(uint8_t * Matrix, pointd point){
+/*void draw_point(uint8_t * Matrix, pointd point){
   for(uint8_t i=0; i<8; i++){
     Matrix[i] = 0;
     if(point.y == i){
@@ -86,7 +85,7 @@ void draw_point(uint8_t * Matrix, pointd point){
     }
   }
   max7219_print(Matrix);
-}
+}*/
 void hello_display(void){
   ST7789_DrawFilledRectangle(0,   0,   160, 20, RED);     // superior izquierda
   ST7789_DrawFilledRectangle(161, 0,   159, 20, GREEN);   // superior derecha
@@ -117,7 +116,6 @@ int main()
   timers.sw_tmr2_period = 100;
   /*Enable the CLK to the GPIOA and GPIOC, this needs to be done before the configuration opf the GPIO*/
   
-
   GPIO_board_config();
 
   UART_GPIO_Config(USART2);
@@ -128,11 +126,9 @@ int main()
   ST7789_Port_Init();   // relojes, pines del puerto B y SPI2 
   ST7789_Init();        // reset por RST, configuracion y pantalla negra
   TM_MFRC522_Init();
-  //sprintf(msg, "RC522 version: 0x%02X\r\n", TM_MFRC522_ReadRegister(MFRC522_REG_VERSION));
   hello_display();
-  uart_puts(USART2, msg);
-  //MFRC522_IRQ_Init()
-  //uart_puts(USART2, "Pantalla inicializada\n\r");
+  //uart_puts(USART2, msg);
+  
 
   while(1)
   {
@@ -148,9 +144,23 @@ int main()
     if (timers.sw_tmr2_flag){
       timers.sw_tmr2_flag = 0;
       if (TM_MFRC522_Check(id) == MI_OK){
-        id_display(id);
+        no_card_count = 0;
+        if(!has_last || memcmp(id, last_id, 4) != 0){
+          memcpy(last_id, id, 4);
+          has_last = 1;
+          id_display(id);
+        }
+      }else{
+        if (has_last){
+          no_card_count++;
+          if(no_card_count >= 20){ 
+            no_card_count = 0;
+            has_last = 0;
+            ST7789_Fill_Color(BLACK);
+            hello_display();
+          }
+        }
       }
     }
-
   }
 }

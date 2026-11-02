@@ -15,5 +15,4 @@
 void MFRC522_Port_Init(void);
 void    MFRC522_WriteReg(uint8_t reg, uint8_t value);
 uint8_t MFRC522_ReadReg(uint8_t reg);
-void MFRC522_IRQ_Init(void);
 #endif // MFRC522_PORT_H

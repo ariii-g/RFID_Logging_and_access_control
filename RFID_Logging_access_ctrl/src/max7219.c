@@ -1,4 +1,4 @@
-#include "max7219.h"
+/*#include "max7219.h"
 #include "spi.h"
 #include "gpio_config.h"
 
@@ -19,6 +19,7 @@ void MAX7219_GPIOConfig(void){;
   dummy = (RCC->AHB1ENR);
 
   /*SPI2 Pins*/
+  /*
   WRITE_REG_FIELD(GPIOB->MODER,GPIO_MODER_MODER9,1); //SPI1_NSS
   WRITE_REG_FIELD(GPIOB->OSPEEDR,GPIO_OSPEEDER_OSPEEDR9,3);
   WRITE_REG_FIELD(GPIOB->MODER,GPIO_MODER_MODER15,2); //SPI1_MOSI
@@ -33,7 +34,7 @@ void MAX7219_GPIOConfig(void){;
 
 
 }
-
+*//*
 void max7219_config(void){
     WRITE_REG_FIELD(RCC->APB1ENR,RCC_APB1ENR_SPI2EN,1);
     volatile unsigned int dummy;
@@ -62,4 +63,4 @@ void max7219_print(uint8_t * Matrix){
         SPI_Master_Tranfer(SPI2, row,2);
         write_pin_state(GPIOB,GPIO_ODR_OD9,1);
     }
-}
+}*/
