@@ -19,8 +19,10 @@ STM32F4 =$(CMSIS)/Device/ST/STM32F4xx
 # Add include directories to search for *.h files
 INCLUDE = -I./inc
 INCLUDE += -I.
+INCLUDE += -I./fatfs #Agregar carpeta de libreria modulo SD
 INCLUDE += -I$(STM32F4)/Include
 INCLUDE += -I$(CMSIS)/Core/Include
+
 
 
 ifeq ($(DBG),1)	
@@ -31,6 +33,7 @@ endif
 
 C_SRC = $(wildcard *.c)
 C_SRC += $(wildcard src/*.c)
+C_SRC += $(wildcard fatfs/*.c) #Se agrega la carpeta de libreria modulo SD
 # add some smt32f4 helper functions
 C_SRC += $(STM32F4)/Source/Templates/system_stm32f4xx.c
 
