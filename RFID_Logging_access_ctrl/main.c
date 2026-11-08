@@ -10,6 +10,7 @@
 #include "inc/usart.h"
 #include "inc/st7789.h"
 #include "inc/tm_stm32f4_mfrc522.h"
+#include "fatfs/ff.h"   
 
 #define LED_PIN 5 // Pin 5 corresponds to the on-board LED on the NUCLEO-64 board
 #define BUTTON_PIN 13 // Pin 13 corresponds to the on-board button on the NUCLEO-64 board
@@ -17,6 +18,7 @@
 
 
 /* Must be delcared volatile as the timer can update asynchounosly*/
+extern void disk_timerproc(void);   // definida en fafts
 volatile SW_Timers timers;
 volatile uint8_t uart_rx_flag=0;
 volatile uint8_t spi_rx_flag=0;
@@ -33,6 +35,7 @@ the Vector table is updated whit the new address where the function is allocated
 the vector table knows where to find the SysTick_Handler*/
 void SysTick_Handler(void){
   update_sw_timers(&timers);
+  disk_timerproc(); // timer de la tarjeta SD, se actualiza cada 1ms
 }
 
 
