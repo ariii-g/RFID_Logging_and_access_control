@@ -8,6 +8,16 @@
 void SPI_Slave_IRQ(SPI_TypeDef *SPI,uint8_t val);
 
 void SPI_Master_Init(SPI_TypeDef * SPI);
+// Divisores del reloj del bus para el campo BR de SPI_CR1
+#define SPI_BR_DIV2    0
+#define SPI_BR_DIV4    1
+#define SPI_BR_DIV8    2
+#define SPI_BR_DIV16   3
+#define SPI_BR_DIV32   4
+#define SPI_BR_DIV64   5
+#define SPI_BR_DIV128  6
+#define SPI_BR_DIV256  7
+void SPI_Master_Config(SPI_TypeDef *SPI, uint8_t cpol, uint8_t cpha, uint8_t br);// SD
 void SPI_Slave_Init(SPI_TypeDef *SPI);
 
 void SPI_Enable(SPI_TypeDef *SPI,char enable);

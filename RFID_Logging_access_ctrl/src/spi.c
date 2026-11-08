@@ -2,7 +2,7 @@
 
 
 void SPI_Master_Init(SPI_TypeDef *SPI){
-
+    
     WRITE_REG_FIELD(SPI->CR1,SPI_CR1_BR,0x3);
     WRITE_REG_FIELD(SPI->CR1,SPI_CR1_CPOL,1);
     WRITE_REG_FIELD(SPI->CR1,SPI_CR1_CPHA,1);
@@ -18,7 +18,23 @@ void SPI_Master_Init(SPI_TypeDef *SPI){
     WRITE_REG_FIELD(SPI->CR2,SPI_CR2_FRF,0);
     //WRITE_REG_FIELD(SPI->CR2,SPI_CR2_SSOE,1);
 }
-
+// Basado en master init, pero con la posibilidad de cambiar el CPOL, CPHA y BR
+void SPI_Master_Config(SPI_TypeDef *SPI, uint8_t cpol, uint8_t cpha, uint8_t br){
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_SPE,0);       // BR, CPOL y CPHA solo se cambian 
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_BR,br);
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_CPOL,cpol);
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_CPHA,cpha);
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_LSBFIRST,0);  // MSB primero
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_SSM,1);       // NSS por software
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_SSI,1);       // evita error MODF
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_RXONLY,0);
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_DFF,0);       // 8 bits
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_BIDIMODE,0);  // full-duplex
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_CRCEN,0);     // sin CRC por hardware
+    WRITE_REG_FIELD(SPI->CR1,SPI_CR1_MSTR,1);      // maestro
+    WRITE_REG_FIELD(SPI->CR2,SPI_CR2_FRF,0);       // formato Motorola
+    WRITE_REG_FIELD(SPI->CR2,SPI_CR2_SSOE,0);      // el SPI no maneja NSS
+}
 
 
 void SPI_Slave_Init(SPI_TypeDef *SPI){

@@ -10,9 +10,11 @@
 #include "inc/usart.h"
 #include "inc/st7789.h"
 #include "inc/tm_stm32f4_mfrc522.h"
+#include "fatfs/diskio.h"
+#include "inc/sd_port.h"
 #include "fatfs/ff.h"   
 
-#define LED_PIN 5 // Pin 5 corresponds to the on-board LED on the NUCLEO-64 board
+
 #define BUTTON_PIN 13 // Pin 13 corresponds to the on-board button on the NUCLEO-64 board
 /*Declaration of two timers made by software updated every 1ms*/
 
@@ -46,17 +48,11 @@ void USART2_IRQHandler(void){
   }
 }
 void GPIO_board_config(void){
-  GPIO_InitTypeDef GPIO_Init; 
-  GPIO_Init.Pin = LED_PIN;
-  GPIO_Init.Mode = 1; // Output function mode
-  GPIO_Init.Pull = 0; // No pull-up or pull-down
-  GPIO_Init.Speed = 3; 
-  GPIO_Config(GPIOA,GPIO_Init);
-
-  GPIO_Init.Pin = BUTTON_PIN;
+ /* GPIO_Init.Pin = BUTTON_PIN;
   GPIO_Init.Mode = 0;
   GPIO_Init.Pull = 1;
   GPIO_Config(GPIOC,GPIO_Init);
+  */
 
 }
 
@@ -107,7 +103,29 @@ void id_display(uint8_t * id){
   ST7789_WriteString(75, 100, id_str, Font_11x18, CYAN, BLACK);
   ST7789_WriteString(40, 130, "ACCESO DENEGADO", Font_16x26, RED, BLACK);
 }
-
+static void sd_test(void){
+  char msg[64];
+  static BYTE buf[512];      // un sector; static para no ocupar 512 bytes de la pila
+  BYTE tipo = 0;
+  DSTATUS st;
+    uart_puts(USART2, "2. Entro a sd_test\r\n");
+  //  CMD0, CMD8, ACMD41, CMD58 activos
+  st = disk_initialize(0);
+  sprintf(msg, "disk_initialize 0x%02X\r\n", st);
+  uart_puts(USART2, msg);
+  if (st & STA_NOINIT) return;          // fallo no seguir
+  //  Que tipo de tarjeta detecto
+  disk_ioctl(0, MMC_GET_TYPE, &tipo);
+  sprintf(msg, "Tipo de tarjeta 0x%02X\r\n", tipo);
+  uart_puts(USART2, msg);
+  //  Leer el sector 0 y mirar sus 2 ultimos bytes
+  if (disk_read(0, buf, 0, 1) == RES_OK){
+    sprintf(msg, "Sector 0 ultimos 2 bytes: %02X %02X\r\n", buf[510], buf[511]);
+  } else {
+    sprintf(msg, "Error leyendo el sector 0\r\n");
+  }
+  uart_puts(USART2, msg);
+}
 int main()
 {
 
@@ -118,14 +136,16 @@ int main()
   timers.sw_tmr1_period = 1000;
   timers.sw_tmr2_period = 100;
   /*Enable the CLK to the GPIOA and GPIOC, this needs to be done before the configuration opf the GPIO*/
-  
+
+
   GPIO_board_config();
 
   UART_GPIO_Config(USART2);
   UART_Init(USART2,115200);
   UART_RX_IRQ_EN(USART2,1);
   NVIC_EnableIRQ(USART2_IRQn);
-  
+  uart_puts(USART2, "1. Entro a sd_test\r\n");
+  sd_test();
   ST7789_Port_Init();   // relojes, pines del puerto B y SPI2 
   ST7789_Init();        // reset por RST, configuracion y pantalla negra
   TM_MFRC522_Init();
@@ -135,11 +155,6 @@ int main()
 
   while(1)
   {
-    if(timers.sw_tmr1_flag){      
-      timers.sw_tmr1_flag = 0;
-      toggle_pin_state(GPIOA, LED_PIN);
-    }
-
     if(uart_rx_flag){              
       uart_rx_flag = 0;
       uart_putc(USART2, uart_rx_data);
