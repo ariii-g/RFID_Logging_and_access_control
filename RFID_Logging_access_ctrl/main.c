@@ -29,6 +29,8 @@ uint8_t id[5];
 uint8_t last_id[4];
 uint8_t has_last = 0;
 uint8_t no_card_count = 0;
+static FATFS fs;     // area de trabajo la tarjeta SD
+static FIL   fil;    // un archivo abierto
 
 
 
@@ -126,6 +128,47 @@ static void sd_test(void){
   }
   uart_puts(USART2, msg);
 }
+
+static void fatfs_test(void){
+  char msg[64];
+  char linea[64];
+  FRESULT fr;        // codigo de resultado de FatFs
+
+  // FatFs inicializa la tarjeta y lee su sistema de archivos FAT32
+  fr = f_mount(&fs, "", 1);
+  sprintf(msg, "mount %d\r\n", fr);
+  uart_puts(USART2, msg);
+  if (fr != FR_OK) return;
+
+  //Crear el archivo  lo borra y empieza vacio
+  fr = f_open(&fil, "PRUEBA.TXT", FA_WRITE | FA_CREATE_ALWAYS);
+  sprintf(msg, "escribir = %d\r\n", fr);
+  uart_puts(USART2, msg);
+  if (fr != FR_OK) return;
+
+  //Escribir dos lineas de texto al archivo
+  f_printf(&fil, "Prueba de archivos\n");
+  f_printf(&fil, "Linea numero %d je\n", 2034);
+
+  // Se graban los datos en la tarjeta
+  fr = f_close(&fil);
+  sprintf(msg, "cerrar %d\r\n", fr);
+  uart_puts(USART2, msg);
+
+  //Abrir el mismo archivo para leer y mostrarlo linea por linea
+  fr = f_open(&fil, "PRUEBA.TXT", FA_READ);
+  sprintf(msg, "leer %d\r\n", fr);
+  uart_puts(USART2, msg);
+  if (fr != FR_OK) return;
+
+  while (f_gets(linea, sizeof linea, &fil)) {   // NULL al llegar al final
+    uart_puts(USART2, "  leido ");
+    uart_puts(USART2, linea);                   // f_gets deja el \n al final
+    uart_puts(USART2, "\r");
+  }
+  f_close(&fil);
+  uart_puts(USART2, "Prueba de archivos \r\n");
+}
 int main()
 {
 
@@ -145,7 +188,8 @@ int main()
   UART_RX_IRQ_EN(USART2,1);
   NVIC_EnableIRQ(USART2_IRQn);
   uart_puts(USART2, "1. Entro a sd_test\r\n");
-  sd_test();
+  //sd_test();
+  fatfs_test();
   ST7789_Port_Init();   // relojes, pines del puerto B y SPI2 
   ST7789_Init();        // reset por RST, configuracion y pantalla negra
   TM_MFRC522_Init();
