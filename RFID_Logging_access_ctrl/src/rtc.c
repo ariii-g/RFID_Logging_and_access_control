@@ -1,0 +1,12 @@
+#include "inc/rtc.h"
+
+void RTC_Init(void){
+    WRITE_REG_FIELD(RCC->APB1ENR,RCC_APB1ENR_PWREN,1);
+    volatile unsigned int dummy;
+    dummy = (RCC->APB1ENR);
+    WRITE_REG_FIELD(PWR->CR,PWR_CR_DBP,1);
+    WRITE_REG_FIELD(RCC->BDCR,RCC_BDCR_LSEON,1);
+    while (!(READ_REG_FIELD(PWR->BDCR,RCC_BDCR_LSERDY)));
+    WRITE_REG_FIELD(RCC->BDCR,RCC_BDCR_RTCSEL,1); // LSE
+    WRITE_REG_FIELD(RCC->BDCR,RCC_BDCR_RTCEN,1);
+}
