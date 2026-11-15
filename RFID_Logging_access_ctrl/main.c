@@ -15,11 +15,6 @@
 #include "fatfs/ff.h"   
 #include "inc/rtc.h"
 
-
-#define BUTTON_PIN 13 // Pin 13 corresponds to the on-board button on the NUCLEO-64 board
-/*Declaration of two timers made by software updated every 1ms*/
-
-
 /* Must be delcared volatile as the timer can update asynchounosly*/
 extern void disk_timerproc(void);   // definida en fafts
 volatile SW_Timers timers;
@@ -50,36 +45,6 @@ void USART2_IRQHandler(void){
     uart_rx_flag = 1;
   }
 }
-
-uint8_t data[8] ={
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00,
-  0x00
-};
-
-typedef struct 
-{
-  uint8_t x;
-  uint8_t y;
-} pointd;
-
-pointd point;
-
-
-/*void draw_point(uint8_t * Matrix, pointd point){
-  for(uint8_t i=0; i<8; i++){
-    Matrix[i] = 0;
-    if(point.y == i){
-      Matrix[i] |= (1<<point.x);
-    }
-  }
-  max7219_print(Matrix);
-}*/
 void hello_display(void){
   ST7789_DrawFilledRectangle(0,   0,   160, 20, RED);     // superior izquierda
   ST7789_DrawFilledRectangle(161, 0,   159, 20, GREEN);   // superior derecha
@@ -98,128 +63,32 @@ void id_display(uint8_t * id){
   ST7789_WriteString(75, 100, id_str, Font_11x18, CYAN, BLACK);
   ST7789_WriteString(40, 130, "ACCESO DENEGADO", Font_16x26, RED, BLACK);
 }
-static void sd_test(void){
-  char msg[64];
-  static BYTE buf[512];      // un sector; static para no ocupar 512 bytes de la pila
-  BYTE tipo = 0;
-  DSTATUS st;
-    uart_puts(USART2, "2. Entro a sd_test\r\n");
-  //  CMD0, CMD8, ACMD41, CMD58 activos
-  st = disk_initialize(0);
-  sprintf(msg, "disk_initialize 0x%02X\r\n", st);
-  uart_puts(USART2, msg);
-  if (st & STA_NOINIT) return;          // fallo no seguir
-  //  Que tipo de tarjeta detecto
-  disk_ioctl(0, MMC_GET_TYPE, &tipo);
-  sprintf(msg, "Tipo de tarjeta 0x%02X\r\n", tipo);
-  uart_puts(USART2, msg);
-  //  Leer el sector 0 y mirar sus 2 ultimos bytes
-  if (disk_read(0, buf, 0, 1) == RES_OK){
-    sprintf(msg, "Sector 0 ultimos 2 bytes: %02X %02X\r\n", buf[510], buf[511]);
-  } else {
-    sprintf(msg, "Error leyendo el sector 0\r\n");
-  }
-  uart_puts(USART2, msg);
-}
-
-static void fatfs_test(void){
-  char msg[64];
-  char linea[64];
-  FRESULT fr;        // codigo de resultado de FatFs
-
-  // FatFs inicializa la tarjeta y lee su sistema de archivos FAT32
-  fr = f_mount(&fs, "", 1);
-  sprintf(msg, "mount %d\r\n", fr);
-  uart_puts(USART2, msg);
-  if (fr != FR_OK) return;
-
-  //Crear el archivo  lo borra y empieza vacio
-  fr = f_open(&fil, "PRUEBA.TXT", FA_WRITE | FA_CREATE_ALWAYS);
-  sprintf(msg, "escribir = %d\r\n", fr);
-  uart_puts(USART2, msg);
-  if (fr != FR_OK) return;
-
-  //Escribir dos lineas de texto al archivo
-  f_printf(&fil, "Prueba de archivos\n");
-  f_printf(&fil, "Linea numero %d je\n", 2034);
-
-  // Se graban los datos en la tarjeta
-  fr = f_close(&fil);
-  sprintf(msg, "cerrar %d\r\n", fr);
-  uart_puts(USART2, msg);
-
-  //Abrir el mismo archivo para leer y mostrarlo linea por linea
-  fr = f_open(&fil, "PRUEBA.TXT", FA_READ);
-  sprintf(msg, "leer %d\r\n", fr);
-  uart_puts(USART2, msg);
-  if (fr != FR_OK) return;
-
-  while (f_gets(linea, sizeof linea, &fil)) {   // NULL al llegar al final
-    uart_puts(USART2, "  leido ");
-    uart_puts(USART2, linea);                   // f_gets deja el \n al final
-    uart_puts(USART2, "\r");
-  }
-  f_close(&fil);
-  uart_puts(USART2, "Prueba de archivos \r\n");
-}
-static void rtc_test(void){
-  char msg[80];
-  uint32_t tr, dr, seg_ini, seg_fin;
-  RTC_Init();                     
-  sprintf(msg, "BDCR = 0x%08lX \r\n", RCC->BDCR);
-  uart_puts(USART2, msg);
-  while (!(READ_REG_FIELD(RTC->ISR, RTC_ISR_RSF)));
-
-  for (int i = 0; i < 5; i++){
-    tr = RTC->TR;
-    dr = RTC->DR;
-    sprintf(msg, "TR=0x%08lX DR=0x%08lX  ->  %02lX:%02lX:%02lX  %02lX/%02lX/20%02lX\r\n",
-            tr, dr,
-            (tr >> 16) & 0x3F, (tr >> 8) & 0x7F, tr & 0x7F,   // hora : min : seg (BCD)
-            dr & 0x3F, (dr >> 8) & 0x1F, (dr >> 16) & 0xFF);  // dia / mes / año (BCD)
-    uart_puts(USART2, msg);
-
-    if (i == 0) seg_ini = READ_REG_FIELD(RTC->TR, RTC_TR_ST) * 10 + READ_REG_FIELD(RTC->TR, RTC_TR_SU);
-    SysTick_Delay_us(1000);
-  }
-  seg_fin = READ_REG_FIELD(RTC->TR, RTC_TR_ST) * 10 + READ_REG_FIELD(RTC->TR, RTC_TR_SU);
-  uint32_t dif = (seg_fin + 60 - seg_ini) % 60;     // contempla el paso 59 -> 00
-  sprintf(msg, "RTC: avanzo %lu s en 5 lecturas -> %s\r\n", dif, (dif >= 4 && dif <= 6) ? "OK" : "FALLO");
-  uart_puts(USART2, msg);
-}
 int main()
 {
 
   clock_config();
   SysTick_Init(1000);
-  SysTick_enable_IrQ(1);
-   
+  SysTick_enable_IrQ(1); 
   timers.sw_tmr1_period = 1000;
   timers.sw_tmr2_period = 100;
   /*Enable the CLK to the GPIOA and GPIOC, this needs to be done before the configuration opf the GPIO*/
-
-
-  //GPIO_board_config();
-
   UART_GPIO_Config(USART2);
   UART_Init(USART2,115200);
   UART_RX_IRQ_EN(USART2,1);
   NVIC_EnableIRQ(USART2_IRQn);
   RTC_Init();
-  //sd_test();
-  fatfs_test();
- // ST7789_Port_Init();   // relojes, pines del puerto B y SPI2 
-  //ST7789_Init();        // reset por RST, configuracion y pantalla negra
-  //TM_MFRC522_Init();
-  //hello_display();
-  char msg[80];
-  uart_puts(USART2, msg);
-  //rtc_test();
-  int year, month, day, hour, minute, second;
+  ST7789_Port_Init();   // relojes, pines del puerto B y SPI2 
+  ST7789_Init();        // reset por RST, configuracion y pantalla negra
+  TM_MFRC522_Init();
+  hello_display();
 
 while(1)
-{
-    /*if (timers.sw_tmr2_flag){
+ {
+    if(uart_rx_flag){
+      uart_rx_flag = 0;
+      uart_putc(USART2, uart_rx_data);
+    }
+    if (timers.sw_tmr2_flag){
       timers.sw_tmr2_flag = 0;
       if (TM_MFRC522_Check(id) == MI_OK){
         no_card_count = 0;
@@ -239,6 +108,6 @@ while(1)
           }
         }
       }
-    }*/
+    }
   }
 }
