@@ -39,3 +39,9 @@ void RTC_getdatetime(int *year, int *month, int *day, int *hour, int *minute, in
     *month = ((dr >> 12) & 0x1) * 10 + ((dr >> 8) & 0xF);
     *year =2000 + (((dr >> 20) & 0xF) * 10 + ((dr >> 16) & 0xF));
 }
+DWORD get_fattime(void){
+    int year, month, day, hour, minute, second;
+    RTC_getdatetime(&year, &month, &day, &hour, &minute, &second);
+    return ((DWORD)(year - 1980) << 25) | ((DWORD)month << 21) | ((DWORD)day << 16) |
+           ((DWORD)hour << 11) | ((DWORD)minute << 5) | ((DWORD)(second / 2));
+}

@@ -205,8 +205,9 @@ int main()
   UART_Init(USART2,115200);
   UART_RX_IRQ_EN(USART2,1);
   NVIC_EnableIRQ(USART2_IRQn);
+  RTC_Init();
   //sd_test();
-  //fatfs_test();
+  fatfs_test();
  // ST7789_Port_Init();   // relojes, pines del puerto B y SPI2 
   //ST7789_Init();        // reset por RST, configuracion y pantalla negra
   //TM_MFRC522_Init();
@@ -214,18 +215,11 @@ int main()
   char msg[80];
   uart_puts(USART2, msg);
   //rtc_test();
-  RTC_Init();
   int year, month, day, hour, minute, second;
 
 while(1)
 {
-    RTC_getdatetime(&year, &month, &day, &hour, &minute, &second);
-
-    sprintf(msg, "%02d/%02d/%04d %02d:%02d:%02d  TR=0x%08lX ISR=0x%08lX\r\n",
-            day, month, 2000 + year, hour, minute, second, RTC->TR, RTC->ISR);
-    uart_puts(USART2, msg);
-    SysTick_Delay_us(1000);
-    if (timers.sw_tmr2_flag){
+    /*if (timers.sw_tmr2_flag){
       timers.sw_tmr2_flag = 0;
       if (TM_MFRC522_Check(id) == MI_OK){
         no_card_count = 0;
@@ -245,6 +239,6 @@ while(1)
           }
         }
       }
-    }
+    }*/
   }
 }
