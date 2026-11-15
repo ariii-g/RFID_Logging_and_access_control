@@ -8,7 +8,7 @@ void RTC_Init(void){
     WRITE_REG_FIELD(PWR->CR,PWR_CR_DBP,1);
 
     WRITE_REG_FIELD(RCC->BDCR,RCC_BDCR_LSEON,1);
-    while (!(READ_REG_FIELD(RCC->BDCR,RCC_BDCR_LSERDY)))
+    while (!(READ_REG_FIELD(RCC->BDCR,RCC_BDCR_LSERDY)));
     WRITE_REG_FIELD(RCC->BDCR,RCC_BDCR_RTCSEL,1); // LSE
     WRITE_REG_FIELD(RCC->BDCR,RCC_BDCR_RTCEN,1);
     // Desbloquear registro fecha y hora
@@ -25,4 +25,17 @@ void RTC_Init(void){
     WRITE_REG(RTC->DR,0X00267118);
     WRITE_REG_FIELD(RTC->ISR, RTC_ISR_INIT,0);//SALIR
     WRITE_REG(RTC->WPR,0xFF);
+}
+void RTC_getdatetime(int *year, int *month, int *day, int *hour, int *minute, int *second){
+    while (!(READ_REG_FIELD(RTC->ISR, RTC_ISR_RSF)));
+    uint32_t tr = RTC->TR;
+    uint32_t dr = RTC->DR;
+
+    *hour = ((tr >> 20) & 0x3) * 10 + ((tr >> 16) & 0xF);
+    *minute = ((tr >> 12) & 0x7) * 10 + ((tr >> 8) & 0xF);
+    *second = ((tr >> 4) & 0x7) * 10 + (tr & 0xF);
+
+    *day = ((dr >> 4) & 0x3) * 10 + (dr & 0xF);
+    *month = ((dr >> 12) & 0x1) * 10 + ((dr >> 8) & 0xF);
+    *year =2000 + (((dr >> 20) & 0xF) * 10 + ((dr >> 16) & 0xF));
 }
