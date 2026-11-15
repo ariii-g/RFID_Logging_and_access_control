@@ -13,6 +13,7 @@
 #include "fatfs/diskio.h"
 #include "inc/sd_port.h"
 #include "fatfs/ff.h"   
+#include "inc/rtc.h"
 
 
 #define BUTTON_PIN 13 // Pin 13 corresponds to the on-board button on the NUCLEO-64 board
@@ -48,14 +49,6 @@ void USART2_IRQHandler(void){
     uart_rx_data = uart_getc(USART2);
     uart_rx_flag = 1;
   }
-}
-void GPIO_board_config(void){
- /* GPIO_Init.Pin = BUTTON_PIN;
-  GPIO_Init.Mode = 0;
-  GPIO_Init.Pull = 1;
-  GPIO_Config(GPIOC,GPIO_Init);
-  */
-
 }
 
 uint8_t data[8] ={
@@ -169,6 +162,31 @@ static void fatfs_test(void){
   f_close(&fil);
   uart_puts(USART2, "Prueba de archivos \r\n");
 }
+static void rtc_test(void){
+  char msg[80];
+  uint32_t tr, dr, seg_ini, seg_fin;
+  RTC_Init();                     
+  sprintf(msg, "BDCR = 0x%08lX \r\n", RCC->BDCR);
+  uart_puts(USART2, msg);
+  while (!(READ_REG_FIELD(RTC->ISR, RTC_ISR_RSF)));
+
+  for (int i = 0; i < 5; i++){
+    tr = RTC->TR;
+    dr = RTC->DR;
+    sprintf(msg, "TR=0x%08lX DR=0x%08lX  ->  %02lX:%02lX:%02lX  %02lX/%02lX/20%02lX\r\n",
+            tr, dr,
+            (tr >> 16) & 0x3F, (tr >> 8) & 0x7F, tr & 0x7F,   // hora : min : seg (BCD)
+            dr & 0x3F, (dr >> 8) & 0x1F, (dr >> 16) & 0xFF);  // dia / mes / año (BCD)
+    uart_puts(USART2, msg);
+
+    if (i == 0) seg_ini = READ_REG_FIELD(RTC->TR, RTC_TR_ST) * 10 + READ_REG_FIELD(RTC->TR, RTC_TR_SU);
+    SysTick_Delay_us(1000);
+  }
+  seg_fin = READ_REG_FIELD(RTC->TR, RTC_TR_ST) * 10 + READ_REG_FIELD(RTC->TR, RTC_TR_SU);
+  uint32_t dif = (seg_fin + 60 - seg_ini) % 60;     // contempla el paso 59 -> 00
+  sprintf(msg, "RTC: avanzo %lu s en 5 lecturas -> %s\r\n", dif, (dif >= 4 && dif <= 6) ? "OK" : "FALLO");
+  uart_puts(USART2, msg);
+}
 int main()
 {
 
@@ -181,21 +199,20 @@ int main()
   /*Enable the CLK to the GPIOA and GPIOC, this needs to be done before the configuration opf the GPIO*/
 
 
-  GPIO_board_config();
+  //GPIO_board_config();
 
   UART_GPIO_Config(USART2);
   UART_Init(USART2,115200);
   UART_RX_IRQ_EN(USART2,1);
   NVIC_EnableIRQ(USART2_IRQn);
-  uart_puts(USART2, "1. Entro a sd_test\r\n");
   //sd_test();
-  fatfs_test();
-  ST7789_Port_Init();   // relojes, pines del puerto B y SPI2 
-  ST7789_Init();        // reset por RST, configuracion y pantalla negra
-  TM_MFRC522_Init();
-  hello_display();
+  //fatfs_test();
+ // ST7789_Port_Init();   // relojes, pines del puerto B y SPI2 
+  //ST7789_Init();        // reset por RST, configuracion y pantalla negra
+  //TM_MFRC522_Init();
+  //hello_display();
   //uart_puts(USART2, msg);
-  
+  rtc_test();
 
   while(1)
   {
