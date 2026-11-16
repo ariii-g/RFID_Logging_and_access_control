@@ -61,11 +61,12 @@ void id_display(uint8_t * id,const char * nombre, int acceso){
   ST7789_WriteString(95, 70,  nombre, Font_11x18, WHITE, BLACK);
   ST7789_WriteString(75, 100, id_str, Font_11x18, CYAN, BLACK);
   if (acceso){
-    ST7789_WriteString(40, 130, "ACCESO CONCEDIDO", Font_16x26, GREEN, BLACK);
+    ST7789_WriteString(30, 130, "ACCESO CONCEDIDO", Font_16x26, GREEN, BLACK);
   }else{
     ST7789_WriteString(40, 130, "ACCESO DENEGADO", Font_16x26, RED, BLACK);
   }
 }
+
 void id_to_str(const uint8_t *id, char *str){
   sprintf(str, "%02X%02X%02X%02X", id[0], id[1], id[2], id[3]);
 }
@@ -99,16 +100,6 @@ int main()
   init_SD();
 while(1)
  {   
-    char id_str[9];
-    char nombre[41];
-    id_to_str(id, id_str);
-    int acceso = check_access(id_str, nombre, sizeof(nombre));
-    char linea[41];
-    if (uart_get_line(linea, sizeof(linea))) {
-      uart_puts(USART2, "[");
-      uart_puts(USART2, linea);
-      uart_puts(USART2, "]\r\n");
-    }
     if (timers.sw_tmr2_flag){
       timers.sw_tmr2_flag = 0;
       if (TM_MFRC522_Check(id) == MI_OK){
@@ -116,7 +107,17 @@ while(1)
         if(!has_last || memcmp(id, last_id, 4) != 0){
           memcpy(last_id, id, 4);
           has_last = 1;
+          char id_str[9];
+          char nombre[41];
+          id_to_str(id, id_str);                  
+          int acceso = check_access(id_str, nombre, sizeof(nombre)); 
           id_display(id, nombre, acceso);
+
+          if (is_master(id_str)) {
+              menu_maestro();           
+              ST7789_Fill_Color(BLACK);
+              // volver a la pantalla de inicio
+          }
         }
       }else{
         if (has_last){

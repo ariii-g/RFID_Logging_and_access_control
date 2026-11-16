@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stddef.h>
 #define master_id "C3CD9C18"
-#define master_name "Admin"
+#define master_name "ADMINISTRADOR"
 #define master_permission 2
 
 int is_master(const char * id);
