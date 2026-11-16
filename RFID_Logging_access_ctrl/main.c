@@ -1,9 +1,6 @@
-#include <stdatomic.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include "inc/gpio_config.h"
 #include "inc/spi.h"
 #include "inc/system_config.h"
@@ -15,6 +12,8 @@
 #include "fatfs/ff.h"   
 #include "inc/rtc.h"
 #include "inc/master.h"
+#include "inc/users.h"
+#include "inc/eventos.h"
 
 /* Must be delcared volatile as the timer can update asynchounosly*/
 extern void disk_timerproc(void);   // definida en fafts
@@ -53,16 +52,31 @@ void hello_display(void){
   ST7789_WriteString(24, 60,  "CONTROL DE ACCESO", Font_16x26, WHITE, BLACK);
   ST7789_WriteString(61, 110, "Acerque su tarjeta", Font_11x18, CYAN, BLACK);
 }
-void id_display(uint8_t * id){
+void id_display(uint8_t * id,const char * nombre, int acceso){
   char id_str[20];
   sprintf(id_str, "ID: %02X %02X %02X %02X", id[0], id[1], id[2], id[3]);
   ST7789_Fill_Color( BLACK); 
   ST7789_DrawFilledRectangle(0,   0,   320, 20, BLUE);     // superior 
   ST7789_DrawFilledRectangle(0,   220, 320, 20, YELLOW);    // inferior
-  ST7789_WriteString(95, 70,  "USUARIO", Font_16x26, WHITE, BLACK);
+  ST7789_WriteString(95, 70,  nombre, Font_11x18, WHITE, BLACK);
   ST7789_WriteString(75, 100, id_str, Font_11x18, CYAN, BLACK);
-  ST7789_WriteString(40, 130, "ACCESO DENEGADO", Font_16x26, RED, BLACK);
+  if (acceso){
+    ST7789_WriteString(40, 130, "ACCESO CONCEDIDO", Font_16x26, GREEN, BLACK);
+  }else{
+    ST7789_WriteString(40, 130, "ACCESO DENEGADO", Font_16x26, RED, BLACK);
+  }
 }
+void id_to_str(const uint8_t *id, char *str){
+  sprintf(str, "%02X%02X%02X%02X", id[0], id[1], id[2], id[3]);
+}
+void init_SD(void){
+  if (f_mount(&fs, "", 1) != FR_OK) {
+    uart_puts(USART2, "Error en la SD\r\n");
+  }
+  users_recover();   // repara un cambio a medias en USUARIOS.CSV
+  master_init();     // asegura la maestra
+} 
+
 
 int main()
 {
@@ -82,9 +96,13 @@ int main()
   ST7789_Init();        // reset por RST, configuracion y pantalla negra
   TM_MFRC522_Init();
   hello_display();
-
+  init_SD();
 while(1)
- {
+ {   
+    char id_str[9];
+    char nombre[41];
+    id_to_str(id, id_str);
+    int acceso = check_access(id_str, nombre, sizeof(nombre));
     char linea[41];
     if (uart_get_line(linea, sizeof(linea))) {
       uart_puts(USART2, "[");
@@ -98,7 +116,7 @@ while(1)
         if(!has_last || memcmp(id, last_id, 4) != 0){
           memcpy(last_id, id, 4);
           has_last = 1;
-          id_display(id);
+          id_display(id, nombre, acceso);
         }
       }else{
         if (has_last){

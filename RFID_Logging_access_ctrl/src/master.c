@@ -5,26 +5,35 @@ int is_master(const char * id){
 int user_modify(const char *id){
  return !is_master(id);
 }
-int check_access(const char * id){
-    char nombre[128];
-    int permiso;
-    int encontrado;
-  if (is_master(id)) {
-    append_event(id, master_name, master_permission,"CONCEDIDO" );
-    return 1; // Acceso concedido para el usuario maestro
-  } 
-  if (find_user(id, nombre, sizeof(nombre), &permiso, &encontrado) != FR_OK ) {
-      append_event(id, "ERROR", 0, "DENEGADO");
-      return 0; // Error al buscar el usuario
+int check_access(const char *id, char *nombre, size_t nlen){
+    int permiso = 0;
+    int encontrado = 0;
+
+    if (is_master(id)) {
+        strncpy(nombre, master_name, nlen - 1);
+        nombre[nlen - 1] = '\0';
+        append_event(id, nombre, master_permission, "CONCEDIDO");
+        return 1;
     }
-  if (encontrado && permiso == 1) {
-    append_event(id, nombre, permiso, "CONCEDIDO");
-    return 1; // Acceso concedido
-  }
-  append_event(id,"DESCONOCIDO", 0, "DENEGADO");
-  return 0;
-}
-FRESULT master_init(void){
+    if (find_user(id, nombre, nlen, &permiso, &encontrado) != FR_OK) {
+        strncpy(nombre, "ERROR SD", nlen - 1);
+        nombre[nlen - 1] = '\0';
+        append_event(id, nombre, 0, "DENEGADO");
+        return 0;
+    }
+    if (!encontrado) {
+        strncpy(nombre, "DESCONOCIDO", nlen - 1);
+        nombre[nlen - 1] = '\0';
+        append_event(id, nombre, 0, "DENEGADO");
+        return 0;
+    }
+    if (permiso == 1) {
+        append_event(id, nombre, permiso, "CONCEDIDO");
+        return 1;
+    }
+    append_event(id, nombre, permiso,"DENEGADO");
+    return 0;
+}FRESULT master_init(void){
 {
     FRESULT res;
     res = add_user(master_id, master_name, master_permission);
