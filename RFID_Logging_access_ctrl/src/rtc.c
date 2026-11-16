@@ -45,3 +45,9 @@ DWORD get_fattime(void){
     return ((DWORD)(year - 1980) << 25) | ((DWORD)month << 21) | ((DWORD)day << 16) |
            ((DWORD)hour << 11) | ((DWORD)minute << 5) | ((DWORD)(second / 2));
 }
+void RTC_getevents(char *fecha, char *hora){
+    int year, month, day, hour, minute, second;
+    RTC_getdatetime(&year, &month, &day, &hour, &minute, &second);
+    sprintf(fecha, "%04d-%02d-%02d", year, month, day);
+    sprintf(hora, "%02d:%02d:%02d", hour, minute, second);
+}

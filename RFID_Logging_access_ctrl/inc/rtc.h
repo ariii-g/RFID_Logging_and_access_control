@@ -1,5 +1,6 @@
 #ifndef RTC_H
 #define RTC_H
+#include <stdio.h>
 #include "system_config.h"
 #include "inc/rtc.h"
 #include "fatfs/ff.h"      // para el tipo DWORD

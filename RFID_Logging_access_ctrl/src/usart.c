@@ -64,3 +64,41 @@ void uart_puts(USART_TypeDef* USART,const char* str){
     }
     
 }
+
+
+void uart_rx_line_isr(USART_TypeDef* USART){
+    char c = uart_getc(USART);    //  baja la bandera 
+
+    if (uart_line_ready) {
+        return;                   // main no ha usado la línea anterior
+    }
+
+    if (c == '\r' || c == '\n') {  // Enter
+        if (uart_line_len == 0) {
+        return;
+        }
+        uart_line[41] = '\0';
+        uart_line_ready = 1;
+        uart_puts(USART, "\r\n");
+    }
+    else if ((c == '\b' || c == 0x7F) && uart_line_len > 0) {   // Retroceso
+        uart_line_len--;
+        uart_puts(USART, "\b \b");
+    }
+    else if (c >= ' ' && uart_line_len < 41 - 1) {   // Letra normal
+        uart_line[uart_line_len++] = c;
+        uart_putc(USART, c); // eco
+    }
+}
+
+// devuelve y copia linea si está lista, de lo contrario devuelve 0
+int uart_get_line(char *dst, size_t n){
+    if (!uart_line_ready) {
+        return 0;
+    }
+    strncpy(dst, (const char *)uart_line, n - 1);
+    dst[n - 1] = '\0';
+    uart_line_len   = 0;
+    uart_line_ready = 0;        
+    return 1;
+}

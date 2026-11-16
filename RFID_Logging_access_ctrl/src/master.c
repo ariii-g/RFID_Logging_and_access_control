@@ -33,3 +33,4 @@ FRESULT master_init(void){
     }
     return res;            //agregar usuario maestro
 }
+}

@@ -14,6 +14,7 @@
 #include "inc/sd_port.h"
 #include "fatfs/ff.h"   
 #include "inc/rtc.h"
+#include "inc/master.h"
 
 /* Must be delcared volatile as the timer can update asynchounosly*/
 extern void disk_timerproc(void);   // definida en fafts
@@ -41,8 +42,7 @@ void SysTick_Handler(void){
 
 void USART2_IRQHandler(void){
   if(USART2->SR&USART_SR_RXNE){
-    uart_rx_data = uart_getc(USART2);
-    uart_rx_flag = 1;
+    uart_rx_line_isr(USART2);// Cambio eco
   }
 }
 void hello_display(void){
@@ -63,6 +63,7 @@ void id_display(uint8_t * id){
   ST7789_WriteString(75, 100, id_str, Font_11x18, CYAN, BLACK);
   ST7789_WriteString(40, 130, "ACCESO DENEGADO", Font_16x26, RED, BLACK);
 }
+
 int main()
 {
 
@@ -84,9 +85,11 @@ int main()
 
 while(1)
  {
-    if(uart_rx_flag){
-      uart_rx_flag = 0;
-      uart_putc(USART2, uart_rx_data);
+    char linea[41];
+    if (uart_get_line(linea, sizeof(linea))) {
+      uart_puts(USART2, "[");
+      uart_puts(USART2, linea);
+      uart_puts(USART2, "]\r\n");
     }
     if (timers.sw_tmr2_flag){
       timers.sw_tmr2_flag = 0;
