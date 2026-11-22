@@ -1,5 +1,5 @@
 /*
- *   append_event propuesta con Claude, adaptada y probada previa a compilación.
+ *   append_event propuesta con Claude, adaptada y aprobada previa a compilación.
  */
 #include "inc/eventos.h"
 

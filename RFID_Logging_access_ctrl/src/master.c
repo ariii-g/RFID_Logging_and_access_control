@@ -1,6 +1,6 @@
 /*
  *
- *   Todas las funciones propuestas con Claude, adaptadas y probadas previas a compilación.
+ *   Todas las funciones propuestas con Claude, adaptadas y aprobadas previas a compilación.
  */
 #include <stdio.h>
 #include "inc/users.h"

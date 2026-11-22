@@ -1,6 +1,6 @@
 #include "gpio_config.h"
 
-
+/* Base: ejemplo 21-SPI-4, sin modificaciones. */
 void GPIO_clock_enable(volatile GPIO_TypeDef *GPIOx){
   if(GPIOx==GPIOA){
     WRITE_REG_FIELD(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN_Msk, 1);

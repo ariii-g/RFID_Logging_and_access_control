@@ -1,6 +1,6 @@
 /*
  *
- *  Todas las funciones propuestas con Claude, adaptadas y previo a compilación.
+ *  Todas las funciones propuestas con Claude, adaptadas y aprobadas previo a compilación.
  */
 #include "inc/menu.h"
 

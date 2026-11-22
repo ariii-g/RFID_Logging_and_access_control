@@ -81,7 +81,7 @@ $(BUILD):
 
 .PHONY: debug
 debug: $(APPNAME).elf
-	gdb-multiarch $(APPNAME).elf -ex "target remote :1234" -ex "tb Reset_Handler" 
+	gdb-multiarch $(APPNAME).elf -ex "target extended-remote :3333" -ex "monitor reset halt" 
 
 .PHONY: clean
 clean:	

@@ -1,6 +1,6 @@
 /*
  *   RTC_Init ................... escrito propio
- *   RTC_getdatetime, get_fattime,RTC_getevents .... Propuestas con Claude, adaptadas y probadas
+ *   RTC_getdatetime, get_fattime,RTC_getevents .... Propuestas con Claude, adaptadas y aprobadas
  */
 #include "inc/rtc.h"
 
