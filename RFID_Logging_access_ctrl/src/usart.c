@@ -1,6 +1,8 @@
 
 #include "inc/usart.h"
-
+static volatile uint8_t uart_line_len   = 0;
+static volatile uint8_t uart_line_ready = 0;
+static volatile char    uart_line[41];
 void UART_GPIO_Config(USART_TypeDef* USART){
 
     if (USART==USART2){

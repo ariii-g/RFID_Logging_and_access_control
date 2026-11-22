@@ -7,10 +7,6 @@
 
 #define UART_LINE_MAX 41
 
-static volatile uint8_t uart_line_len   = 0;
-static volatile uint8_t uart_line_ready = 0;
-static volatile char    uart_line[41];
-
 void UART_GPIO_Config(USART_TypeDef* USART);
 
 void UART_Init(USART_TypeDef* USART, uint32_t baudrate);

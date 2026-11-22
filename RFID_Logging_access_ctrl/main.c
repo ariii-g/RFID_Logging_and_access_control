@@ -14,6 +14,7 @@
 #include "inc/master.h"
 #include "inc/users.h"
 #include "inc/eventos.h"
+#include "inc/menu.h"
 
 /* Must be delcared volatile as the timer can update asynchounosly*/
 extern void disk_timerproc(void);   // definida en fafts

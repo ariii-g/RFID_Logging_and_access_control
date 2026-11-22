@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include "inc/users.h"
 #include "inc/master.h"
 int is_master(const char * id){
   return strcmp(id, master_id) == 0;

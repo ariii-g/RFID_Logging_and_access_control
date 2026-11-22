@@ -47,15 +47,6 @@ static int leer_permiso(void){
             return 0;
         }
         uart_puts(USART2, "Valor no valido\r\n");
-        uart_puts(USART2, "Valor no valido: [");
-        uart_puts(USART2, linea);
-        uart_puts(USART2, "] hex: ");
-        for (int i = 0; linea[i] != '\0'; i++) {
-            char h[4];
-            sprintf(h, "%02X ", (unsigned char)linea[i]);
-            uart_puts(USART2, h);
-        }
-        uart_puts(USART2, "\r\n");
     }
 }
 static void menu_eliminar(void){
