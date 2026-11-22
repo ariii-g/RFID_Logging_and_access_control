@@ -27,7 +27,7 @@ uint8_t last_id[4];
 uint8_t has_last = 0;
 uint8_t no_card_count = 0;
 static FATFS fs;     // area de trabajo la tarjeta SD
-static FIL   fil;    // un archivo abierto
+
 
 
 
