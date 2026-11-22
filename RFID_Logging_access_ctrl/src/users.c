@@ -1,3 +1,7 @@
+/*
+ *
+ *   Todas las funciones fueron propuestas con Claude verificadas previo a compilación.
+ */
 #include "inc/users.h"
 
 FRESULT find_user(const char *id, char *nombre,size_t nombre_len, int *permiso, int *encontrado){

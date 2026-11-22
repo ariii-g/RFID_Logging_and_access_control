@@ -1,7 +1,13 @@
 #include "st7789.h"
 #include "system_config.h"
-#include "st7789_port.h"
+#include "inc/st7789_port.h"
 #include <string.h>
+/*
+ *   Librería original: Floyd-Fish, ST7789-STM32 (licencia en LICENSE_DISPLAY.txt).
+ *   Adaptada: se reemplazaron las funciones HAL de SPI y GPIO por la
+ *   capa propia st7789_port , y se
+ *   desactivó el uso de DMA .
+ */
 //#ifdef USE_DMA
 
 //uint16_t DMA_MIN_SIZE = 16;

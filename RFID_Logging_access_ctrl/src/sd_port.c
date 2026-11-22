@@ -1,5 +1,8 @@
 #include "sd_port.h"
-
+/*
+ *
+ * Escrito propio, errores revisados con Claude 
+ */
 void sd_init(void){
     WRITE_REG_FIELD(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN, 1);
     WRITE_REG_FIELD(RCC->APB2ENR, RCC_APB2ENR_SPI1EN, 1);

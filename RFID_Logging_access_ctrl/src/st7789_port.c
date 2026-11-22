@@ -1,5 +1,8 @@
 #include "st7789_port.h"
-
+/*
+ *
+ * Escrito propio, errores revisados con Claude 
+ */
 void ST7789_Port_Init(void){
     volatile uint32_t dummy;
 

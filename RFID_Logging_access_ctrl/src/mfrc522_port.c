@@ -1,5 +1,8 @@
 #include "mfrc522_port.h"
-
+/*
+ *
+ * Escrito propio, errores revisados con Claude 
+ */
 void MFRC522_Port_Init(void){
     WRITE_REG_FIELD(RCC->AHB1ENR, RCC_AHB1ENR_GPIOCEN, 1);
     WRITE_REG_FIELD(RCC->APB1ENR, RCC_APB1ENR_SPI3EN, 1);

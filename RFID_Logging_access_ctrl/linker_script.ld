@@ -1,5 +1,5 @@
 ENTRY(Reset_Handler)
-
+/* Regiones ajustadas al STM32F446RE: FLASH 512K, RAM 128K. */
 MEMORY
 {
     FLASH  (rx)  : ORIGIN = 0x08000000, LENGTH = 512K

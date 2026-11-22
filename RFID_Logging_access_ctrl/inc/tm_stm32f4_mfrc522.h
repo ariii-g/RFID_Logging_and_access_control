@@ -53,6 +53,7 @@
  */
 /* Modificado por Ariana Garcia, oct-2026: se eliminan dependencias StdPeriph/TM_SPI,
  * acceso a registros via mfrc522_port.c y reset por hardware en Init. */
+
 #ifndef TM_MFRC522_H
 #define TM_MFRC522_H 100
 /**

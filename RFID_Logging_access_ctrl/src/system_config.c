@@ -1,5 +1,5 @@
 #include "system_config.h"
-
+/* Base: ejemplo 21-SPI-4, sin modificaciones. */
 void update_sw_timers(volatile SW_Timers* timer){
   timer->sw_tmr1_count++;
   timer->sw_tmr2_count++;

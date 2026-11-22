@@ -1,4 +1,7 @@
-
+/*
+ *   uart_putc, uart_getc, uart_puts ... base ejemplo
+ *   uart_rx_line_isr, uart_get_line ... propuestas con Claude, eficiencia en comunicación
+ */
 #include "inc/usart.h"
 static volatile uint8_t uart_line_len   = 0;
 static volatile uint8_t uart_line_ready = 0;

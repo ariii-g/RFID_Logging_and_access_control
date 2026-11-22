@@ -1,6 +1,7 @@
 APPNAME = main
 MACHINE = netduinoplus2
-
+# Makefile - Base: ejemplo 21-SPI-4 .
+# Adaptado por el equipo: fuentes de src/ y fatfs/, -DSTM32F446xx, objetivo flash (OpenOCD).
 
 CC =  arm-none-eabi-gcc
 CFLAGS = -Wall -Wextra -std=c11 -ffreestanding

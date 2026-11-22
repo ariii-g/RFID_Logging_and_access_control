@@ -1,3 +1,7 @@
+/*
+ *   RTC_Init ................... escrito propio
+ *   RTC_getdatetime, get_fattime,RTC_getevents .... Propuestas con Claude, adaptadas y probadas
+ */
 #include "inc/rtc.h"
 
 void RTC_Init(void){

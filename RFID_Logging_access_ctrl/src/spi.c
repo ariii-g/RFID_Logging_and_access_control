@@ -1,5 +1,10 @@
 #include "spi.h"
-
+/*
+ *   SPI_Master_Init, SPI_Enable, SPI_Master_Tranfer,
+ *   funciones Slave ................... base (sin modificar)
+ *   SPI_Master_Config, SPI_Master_Transmit ... propuestas con Claude a partir de
+ *                                       SPI_Master_Tranfer
+ */
 
 void SPI_Master_Init(SPI_TypeDef *SPI){
     

@@ -1,3 +1,12 @@
+/*
+ *
+ *   SysTick_Handler ............ base ejemplo 21-SPI-4
+ *   USART2_IRQHandler .......... base del ejemplo, modificada para llamar a uart_rx_line_isr
+ *   hello_display .............. escrito propio
+ *   id_display ................. escrita propio, completada con IA
+ *   init_SD ..............  propuestas con Claude.
+ *   main.................. escrito propio, corrección de errores con IA
+ */
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>

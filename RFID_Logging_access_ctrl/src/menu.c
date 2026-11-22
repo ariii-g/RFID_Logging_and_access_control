@@ -1,3 +1,7 @@
+/*
+ *
+ *  Todas las funciones propuestas con Claude, adaptadas y previo a compilación.
+ */
 #include "inc/menu.h"
 
 static void menu_opciones(void){
