@@ -13,5 +13,6 @@
 #define ST7789_RST_Set()   (GPIOB->BSRR = (1U << ST7789_RST_PIN))
 
 void ST7789_Port_Init(void);
-
+void ST7789_Port_WriteCmd(uint8_t cmd);
+void ST7789_Port_WriteData(const uint8_t *data, uint32_t size);
 #endif // ST7789_PORT_H

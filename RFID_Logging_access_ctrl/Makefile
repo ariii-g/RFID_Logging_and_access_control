@@ -51,7 +51,7 @@ CFLAGS+=-fno-pic
 CFLAGS+=$(ARCH) --specs=nosys.specs --specs=nano.specs $(INCLUDE) -DSTM32F446xx
 
 LDFLAGS +=-T$(LINKERSCRIPT) 
-LDFLAGS +=-nostdlib -DSTM32F410Rx
+LDFLAGS +=-nostdlib 
 LDFLAGS +=-Wl,--no-relax 
 
 LDLIBS = -lc -lgcc 
