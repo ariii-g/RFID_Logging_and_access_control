@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "ff.h"
 #define ARCHIVO_U "USUARIOS.CSV"
 #define HEADERS_U "ID,nombre,permiso\n"
@@ -12,4 +13,6 @@ FRESULT add_user(const char *id, const char *nombre, int permiso);
 FRESULT delete_user(const char *id);
 FRESULT update_user(const char *id, const char *nombre, int permiso);
 FRESULT users_recover(void);
+FRESULT find_name(const char *nombre, char *id, size_t id_len, int *permiso, int *encontrado);
+static int nombres_iguales(const char *a, const char *b);
 #endif // USERS_H

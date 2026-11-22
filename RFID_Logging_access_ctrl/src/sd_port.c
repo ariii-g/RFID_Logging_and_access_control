@@ -20,6 +20,7 @@ void sd_init(void){
     WRITE_REG_FIELD(GPIOA->OSPEEDR, GPIO_OSPEEDER_OSPEEDR7, 1);
     // pull-up en el MISO para que el bus SPI no quede flotando
     WRITE_REG_FIELD(GPIOA->PUPDR, GPIO_PUPDR_PUPD6, 1);
+
     // Modo funcion alternativa 
     WRITE_REG_FIELD(GPIOA->MODER, GPIO_MODER_MODER5, 2);
     WRITE_REG_FIELD(GPIOA->MODER, GPIO_MODER_MODER6, 2);

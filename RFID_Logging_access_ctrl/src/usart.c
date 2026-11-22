@@ -77,7 +77,7 @@ void uart_rx_line_isr(USART_TypeDef* USART){
         if (uart_line_len == 0) {
         return;
         }
-        uart_line[41] = '\0';
+        uart_line[uart_line_len] = '\0';
         uart_line_ready = 1;
         uart_puts(USART, "\r\n");
     }
@@ -85,7 +85,7 @@ void uart_rx_line_isr(USART_TypeDef* USART){
         uart_line_len--;
         uart_puts(USART, "\b \b");
     }
-    else if (c >= ' ' && uart_line_len < 41 - 1) {   // Letra normal
+    else if (c >= ' ' && uart_line_len < UART_LINE_MAX- 1) {   // Letra normal
         uart_line[uart_line_len++] = c;
         uart_putc(USART, c); // eco
     }

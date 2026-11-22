@@ -11,4 +11,5 @@ int is_master(const char * id);
 int check_access(const char *id, char *nombre, size_t nlen);
 int user_modify(const char *id);
 FRESULT master_init(void);
+void id_to_str(const uint8_t *id, char *str);
 #endif // MASTER_H

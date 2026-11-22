@@ -32,6 +32,7 @@ FRESULT find_user(const char *id, char *nombre,size_t nombre_len, int *permiso, 
             break;
         }
     }
+    
 
     f_close(&fil);
     return FR_OK;
@@ -43,7 +44,7 @@ FRESULT add_user(const char *id, const char *nombre, int permiso)
     char nombre_tmp[128];
     int permiso_tmp;
     int encontrado;
-
+    char id_tmp[9];
     if (strchr(nombre, ',') != NULL) {
         return FR_INVALID_NAME;//Nombre sin comas
     }
@@ -55,6 +56,17 @@ FRESULT add_user(const char *id, const char *nombre, int permiso)
     }
     if (res == FR_OK && encontrado) {
         return FR_EXIST;          
+    }
+    
+    res = find_name(nombre, id_tmp, sizeof(id_tmp), &permiso_tmp, &encontrado);
+    if (res != FR_OK && res != FR_NO_FILE) {
+        return res;
+    }
+    if (res == FR_OK && encontrado) {
+        return FR_DENIED;
+    }
+    if (strchr(nombre, ' ') == NULL) {
+        return FR_INVALID_PARAMETER;
     }
 
     res = f_open(&fil, ARCHIVO_U, FA_OPEN_APPEND | FA_WRITE);
@@ -124,7 +136,20 @@ FRESULT update_user(const char *id, const char *nombre, int permiso)
     if (strchr(nombre, ',') != NULL) {
         return FR_INVALID_NAME;
     }
-
+        // Nombre y apellido
+    if (strchr(nombre, ' ') == NULL) {
+        return FR_INVALID_PARAMETER;
+    }
+    // El nombre no puede ser de otra persona
+    char id_tmp[9];
+    int permiso_tmp, enc_nombre;
+    res = find_name(nombre, id_tmp, sizeof(id_tmp), &permiso_tmp, &enc_nombre);
+    if (res != FR_OK) {
+        return res;
+    }
+    if (enc_nombre && strcmp(id_tmp, id) != 0) {
+        return FR_DENIED;
+    }
     // Abrir original para lectura y temporal para escritura
     res = f_open(&in, ARCHIVO_U, FA_READ);
     if (res != FR_OK) {
@@ -174,4 +199,54 @@ FRESULT users_recover(void)
     }
     // el temporal es la lista buena
     return f_rename(ARCHIVO_TMP, ARCHIVO_U);
+}
+static int nombres_iguales(const char *a, const char *b){
+    while (*a && *b) {                        // mientras ninguno termine
+        if (toupper((unsigned char)*a) != toupper((unsigned char)*b)) {
+            return 0;                         // una letra distinta
+        }
+        a++;
+        b++;
+    }
+    return *a == *b;            
+}
+FRESULT find_name(const char *nombre, char *id, size_t id_len, int *permiso, int *encontrado)
+{
+    FRESULT res;
+    FIL fil;
+    char line[128];
+    *encontrado = 0;
+
+    res = f_open(&fil, ARCHIVO_U, FA_READ);
+    if (res != FR_OK) {
+        return res;
+    }
+
+    f_gets(line, sizeof(line), &fil); // Leer encabezados
+    while (f_gets(line, sizeof(line), &fil)) {
+        size_t len = strlen(line);
+        while (len > 0 && (line[len - 1] == '\n' || line[len - 1] == '\r')) {
+            line[--len] = '\0';
+        }
+
+        // Separar información por comas
+        char *coma1 = strchr(line, ',');
+        if (coma1 == NULL) continue;
+        *coma1 = '\0';
+
+        char *coma2 = strchr(coma1 + 1, ',');
+        if (coma2 == NULL) continue;
+        *coma2 = '\0';
+
+        if (nombres_iguales(coma1 + 1, nombre)) {
+            strncpy(id, line, id_len - 1);
+            id[id_len - 1] = '\0';
+            *permiso = atoi(coma2 + 1);
+            *encontrado = 1;
+            break;
+        }
+    }
+
+    f_close(&fil);
+    return FR_OK;
 }

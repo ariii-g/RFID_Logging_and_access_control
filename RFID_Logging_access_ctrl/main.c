@@ -66,13 +66,12 @@ void id_display(uint8_t * id,const char * nombre, int acceso){
     ST7789_WriteString(40, 130, "ACCESO DENEGADO", Font_16x26, RED, BLACK);
   }
 }
-
-void id_to_str(const uint8_t *id, char *str){
-  sprintf(str, "%02X%02X%02X%02X", id[0], id[1], id[2], id[3]);
-}
 void init_SD(void){
-  if (f_mount(&fs, "", 1) != FR_OK) {
-    uart_puts(USART2, "Error en la SD\r\n");
+  FRESULT fr = f_mount(&fs, "", 1);
+  if (fr != FR_OK) {
+    char msg[40];
+    sprintf(msg, "Error al montar la SD: %d\r\n", fr);
+    uart_puts(USART2, msg);
   }
   users_recover();   // repara un cambio a medias en USUARIOS.CSV
   master_init();     // asegura la maestra
@@ -97,7 +96,7 @@ int main()
   ST7789_Init();        // reset por RST, configuracion y pantalla negra
   TM_MFRC522_Init();
   hello_display();
-  init_SD();
+  init_SD();                                // configura pines y SPI1
 while(1)
  {   
     if (timers.sw_tmr2_flag){
@@ -116,7 +115,6 @@ while(1)
           if (is_master(id_str)) {
               menu_maestro();           
               ST7789_Fill_Color(BLACK);
-              // volver a la pantalla de inicio
           }
         }
       }else{

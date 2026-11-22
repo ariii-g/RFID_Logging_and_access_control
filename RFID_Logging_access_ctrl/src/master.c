@@ -43,3 +43,6 @@ int check_access(const char *id, char *nombre, size_t nlen){
     return res;            //agregar usuario maestro
 }
 }
+void id_to_str(const uint8_t *id, char *str){
+  sprintf(str, "%02X%02X%02X%02X", id[0], id[1], id[2], id[3]);
+}
