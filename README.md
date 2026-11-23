@@ -3,7 +3,7 @@
 Sistema de control de acceso mediante RFID, incorporando seguimiento de usuarios y horas de acceso en archivos de datos e interacción con el usuario en interfaz gráfica
 
 **Integrantes:**  Ariana Sofia Garcia Duran y Daniel Santiago Salavarrieta Casasbuenas
-<!-- **Informe:** [docs/informe.pdf](docs/informe.pdf) -->
+*Informe:* [informe.pdf](RFID_Logging_access_ctrl/docs/INFORME_MPEI.pdf)
 
 
 
