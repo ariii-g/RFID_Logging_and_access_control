@@ -4,7 +4,7 @@ Sistema de control de acceso mediante RFID, incorporando seguimiento de usuarios
 
 **Integrantes:**  Ariana Sofia Garcia Duran y Daniel Santiago Salavarrieta Casasbuenas
 *Informe:* [informe.pdf](RFID_Logging_access_ctrl/docs/INFORME_MPEI.pdf)
-
+**Se encuentran en la carpeta docs la presentación y demostración**
 
 
 ## 1. Funcionalidades
